@@ -51,11 +51,26 @@ EMPTYSTRING = ''
 COMMASPACE = ', '
 
 class SMTPServer(StreamServer):
+    
+    
+    def __init__(self, localaddr=None, remoteaddr=None, **kwargs):
+
+        self.relay = bool(remoteaddr)
+        self.remoteaddr = remoteaddr
+        
+        self.localaddr = localaddr
+
+        if not self.localaddr:
+            self.localaddr = ('127.0.0.1', 25)
+
+        super(SMTPServer, self).__init__(self.localaddr, self.handle, **kwargs)
 
     def handle(self, sock, addr):
 
-        logger.info('Incomming connection %s:%s', *addr[:2])
-        
+        logger.debug('Incomming connection %s:%s', *addr[:2])
+        if self.relay and not addr[0] in self.remoteaddr:
+            logger.debug('Not in remoteaddr', *addr[:2])
+            return 
         try:
             with Timeout(self.timeout, ConnectionTimeout):
                 try:
