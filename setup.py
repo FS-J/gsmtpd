@@ -19,6 +19,7 @@ with open('requirements.txt') as require:
                         'Programming Language :: Python :: 2',
                         'Programming Language :: Python :: 2.6',
                         'Programming Language :: Python :: 2.7',
-                        'Topic :: Internet :: SMTP Servers',
+                        'Topic :: Communications :: Email :: Mail Transport Agents',
+                        'Topic :: Communications :: Email'
             ],
             long_description=long_description)
