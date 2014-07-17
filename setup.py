@@ -13,7 +13,6 @@ with open('requirements.txt') as require:
             author_email='mengzhuo1203@gmail.com',
             url='https://github.com/34nm/gsmtpd',
             packages=['gsmtpd'],
-            packages_data={'gsmtpd':['README.rst','LICENSE']},
             install_requires=[line for line in require.readlines()],
             classifiers=[
                         'License :: OSI Approved :: MIT License',
