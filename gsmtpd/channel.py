@@ -22,13 +22,13 @@ class SMTPChannel(object):
     COMMAND = 0
     DATA = 1
 
-    def __init__(self, server, conn, addr, max_size=1024000):
+    def __init__(self, server, conn, addr, data_max_size=1024000):
         self.server = server
         self.conn = conn
         self.addr = addr
         self.line = []
         self.state = self.COMMAND
-        self.greeting = 0
+        self.seen_greeting = 0
         self.mailfrom = None
         self.rcpttos = []
         self.data = ''
@@ -37,8 +37,9 @@ class SMTPChannel(object):
 
         self.ac_in_buffer = ''
         self.closed = False
-        self.max_size = max_size # in byte
+        self.data_max_size = data_max_size # in byte
         self.current_size = 0
+
         try:
             self.peer = conn.getpeername()
         except socket.error, err:
@@ -60,7 +61,7 @@ class SMTPChannel(object):
     def collect_incoming_data(self, data):
         self.line.append(data)
         self.current_size += len(data)
-        if self.current_size > self.max_size:
+        if self.current_size > self.data_max_size:
             self.push('452 Command has been aborted because mail too big')
             self.close_when_done()
 
@@ -118,11 +119,25 @@ class SMTPChannel(object):
         if not arg:
             self.push('501 Syntax: HELO hostname')
             return
-        if self.greeting:
+        if self.seen_greeting:
             self.push('503 Duplicate HELO/EHLO')
         else:
-            self.greeting = arg
+            self.seen_greeting = arg
             self.push('250 %s' % self.fqdn)
+
+    def smtp_EHLO(self, arg):
+        if not arg:
+            self.push('501 Syntax: EHLO hostname')
+            return
+        if self.seen_greeting:
+            self.push('503 Duplicate HELO/EHLO')
+        else:
+            self.seen_greeting = arg
+            self.extended_smtp = True
+            self.push('250-%s' % self.fqdn)
+            if self.data_size_limit:
+                self.push('250-SIZE %s' % self.data_size_limit)
+            self.push('250 HELP')
 
     def smtp_NOOP(self, arg):
         if arg:
