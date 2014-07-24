@@ -221,9 +221,8 @@ class SMTPChannel(object):
         if arg:
             self.push('501 Syntax: RSET')
             return
-
-        self.conn = ssl.wrap_socket(self.conn, **self.server.ssl)
         self.push('220 Ready to start TLS')
+        self.conn = ssl.wrap_socket(self.conn, **self.server.ssl)
 
     def handle_read(self):
         try:
