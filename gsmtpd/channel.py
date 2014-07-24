@@ -228,13 +228,12 @@ class SMTPChannel(object):
             return
 
         try:
-            self.push('220 %s %s' % (self.fqdn, self.version))
             self.conn = ssl.wrap_socket(self.conn, **self.server.ssl)
             self.state = self.COMMAND
             self.seen_greeting = 0
-            self.data = ''
             self.rcpttos = []
             self.mailfrom = None
+            self.push('220 %s %s' % (self.fqdn, self.version))
         except Exception as err:
             logger.error(err, exc_info=True)
             self.push('503 certificate is FAILED')
