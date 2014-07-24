@@ -142,7 +142,7 @@ class SMTPChannel(object):
                 self.push('250-%s on plain' % self.fqdn)
 
             try:
-                if self.server.ssl:
+                if self.server.ssl and not self.tls:
                     self.push('250-STARTTLS')
             except AttributeError:
                 pass
