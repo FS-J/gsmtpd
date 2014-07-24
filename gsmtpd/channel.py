@@ -39,7 +39,8 @@ class SMTPChannel(object):
         self.closed = False
         self.data_size_limit = data_size_limit # in byte
         self.current_size = 0
-        self.version = '0.1.4'
+        self.version = '0.1.5'
+        self.tls = False
         try:
             self.peer = conn.getpeername()
         except socket.error, err:
@@ -135,7 +136,10 @@ class SMTPChannel(object):
         else:
             self.seen_greeting = arg
             self.extended_smtp = True
-            self.push('250-%s' % self.fqdn)
+            if self.tls:
+                self.push('250-%s on TLS' % self.fqdn)
+            else:
+                self.push('250-%s on plain' % self.fqdn)
 
             try:
                 if self.server.ssl:
@@ -233,6 +237,7 @@ class SMTPChannel(object):
             self.seen_greeting = 0
             self.rcpttos = []
             self.mailfrom = None
+            self.tls = True
         except Exception as err:
             logger.error(err, exc_info=True)
             self.push('503 certificate is FAILED')
