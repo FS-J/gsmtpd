@@ -24,7 +24,7 @@ An RFC 2821 smtp proxy Port from Python Standrad Library for gevent usage
 # Please note that this script requires Python 2.0
 #
 # Author: Barry Warsaw <barry@python.org>
-#
+#         Meng Zhuo <mengzhuo1203@gmail.com>
 # TODO:
 #
 # - support mailbox delivery

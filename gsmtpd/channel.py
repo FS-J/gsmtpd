@@ -39,7 +39,7 @@ class SMTPChannel(object):
         self.closed = False
         self.data_size_limit = data_size_limit # in byte
         self.current_size = 0
-
+        self.version = '0.1.2'
         try:
             self.peer = conn.getpeername()
         except socket.error, err:
@@ -49,7 +49,7 @@ class SMTPChannel(object):
             if err[0] != errno.ENOTCONN:
                 raise
             return
-        self.push('220 %s %s' % (self.fqdn, '0.1'))
+        self.push('220 %s %s' % (self.fqdn, self.version))
         self.terminator = '\r\n'
         logger.debug('SMTP channel initialized')
 
@@ -222,11 +222,22 @@ class SMTPChannel(object):
             self.push('501 Syntax: STARTTLS')
             return
         self.push('220 Ready to start TLS')
+        
+        if self.data:
+            self.push('500 Too late to changed')
+            return
+
         try:
             self.conn = ssl.wrap_socket(self.conn, **self.server.ssl)
+            self.state = self.COMMAND
+            self.seen_greeting = 0
+            self.data = ''
+            self.rcpttos = []
+            self.mailfrom = None
+            self.push('220 %s %s' % (self.fqdn, self.version))
         except Exception as err:
             logger.error(err, exc_info=True)
-            self.push('500 certificate is FAILED')
+            self.push('503 certificate is FAILED')
             self.close_when_done()
 
     def handle_read(self):
