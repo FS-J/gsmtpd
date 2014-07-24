@@ -39,7 +39,7 @@ class SMTPChannel(object):
         self.closed = False
         self.data_size_limit = data_size_limit # in byte
         self.current_size = 0
-        self.version = '0.1.5'
+        self.version = '0.1.6'
         self.tls = False
         try:
             self.peer = conn.getpeername()
@@ -149,7 +149,7 @@ class SMTPChannel(object):
 
             if self.data_size_limit:
                 self.push('250-SIZE %s' % self.data_size_limit)
-            self.push('250 OK')
+            self.push('250 HELP')
 
     def smtp_NOOP(self, arg):
         if arg:
@@ -242,6 +242,16 @@ class SMTPChannel(object):
             logger.error(err, exc_info=True)
             self.push('503 certificate is FAILED')
             self.close_when_done()
+    
+    def smtp_HELP(self, arg):
+
+        if arg:
+            if arg == 'ME':
+                self.push('504 Go to https://github.com/34nm/gsmtpd/issues for help')
+            else:
+                self.push('501 Syntax: HELP')
+        else:
+            self.push('214 SMTP server is running...go to website for further help')
 
     def handle_read(self):
         try:

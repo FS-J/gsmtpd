@@ -11,7 +11,7 @@ Install
 Usage
 ---------
 
-Basically gsmtp is ported from Python standard lib *smtpd*,
+Basically gsmtpd is ported from Python standard lib *smtpd*,
 you can it check from Doc_
 
 however there is only one difference, you should add monkey patch of gevent
@@ -20,8 +20,6 @@ however there is only one difference, you should add monkey patch of gevent
 
     from gevent import monkey
     monkey.patch_all()
-
-
 
 
 .. _Doc: https://docs.python.org/2/library/smtpd.html?highlight=smtpd#module-smtpd
