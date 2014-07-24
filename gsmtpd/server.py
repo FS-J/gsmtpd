@@ -35,9 +35,13 @@ An RFC 2821 smtp proxy Port from Python Standrad Library for gevent usage
 import logging
 logger = logging.getLevelName(__name__)
 
+from UserDict import UserDict
+
 from gevent import socket, monkey, sleep, Timeout
 monkey.patch_all()
 from gevent.server import StreamServer
+
+from ssl import PROTOCOL_TLSv1
 
 from channel import SMTPChannel
 
@@ -50,10 +54,28 @@ NEWLINE = '\n'
 EMPTYSTRING = ''
 COMMASPACE = ', '
 
+class SSLSettings(UserDict):
+
+    def __init__(self, keyfile=None, certfile=None,
+                 ssl_version=PROTOCOL_TLSv1, ca_certs=None,
+                 do_handshake_on_connect=True,
+                 suppress_ragged_eofs=True, ciphers=None, **kwargs):
+
+        super(SSLSettings, self).__init__()
+        self.data.update( dict(keyfile = keyfile,
+                                certfile = certfile,
+                                server_side = True,
+                                ssl_version = ssl_version,
+                                ca_certs = ca_certs,
+                                do_handshake_on_connect = do_handshake_on_connect,
+                                suppress_ragged_eofs = suppress_ragged_eofs,
+                                ciphers = ciphers))
+
+
 class SMTPServer(StreamServer):
     
     
-    def __init__(self, localaddr=None, remoteaddr=None, **kwargs):
+    def __init__(self, localaddr=None, remoteaddr=None, ssl=False, **kwargs):
 
         self.relay = bool(remoteaddr)
         self.remoteaddr = remoteaddr
@@ -62,6 +84,11 @@ class SMTPServer(StreamServer):
 
         if not self.localaddr:
             self.localaddr = ('127.0.0.1', 25)
+        
+        self.ssl = ssl
+
+        if self.ssl:
+            self.ssl = SSLSettings(**kwargs)
 
         super(SMTPServer, self).__init__(self.localaddr, self.handle, **kwargs)
 

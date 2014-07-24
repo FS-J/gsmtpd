@@ -3,7 +3,7 @@
 
 import logging
 logger = logging.getLogger(__name__)
-from gevent import monkey, socket
+from gevent import monkey, socket, ssl
 
 import errno
 from asynchat import find_prefix_at_end
@@ -22,7 +22,7 @@ class SMTPChannel(object):
     COMMAND = 0
     DATA = 1
 
-    def __init__(self, server, conn, addr, data_max_size=1024000):
+    def __init__(self, server, conn, addr, data_size_limit=1024000):
         self.server = server
         self.conn = conn
         self.addr = addr
@@ -37,7 +37,7 @@ class SMTPChannel(object):
 
         self.ac_in_buffer = ''
         self.closed = False
-        self.data_max_size = data_max_size # in byte
+        self.data_size_limit = data_size_limit # in byte
         self.current_size = 0
 
         try:
@@ -52,6 +52,7 @@ class SMTPChannel(object):
         self.push('220 %s %s' % (self.fqdn, '0.1'))
         self.terminator = '\r\n'
         logger.debug('SMTP channel initialized')
+
     # Overrides base class for convenience
     def push(self, msg):
         logger.debug('PUSH %s' % msg)
@@ -61,7 +62,7 @@ class SMTPChannel(object):
     def collect_incoming_data(self, data):
         self.line.append(data)
         self.current_size += len(data)
-        if self.current_size > self.data_max_size:
+        if self.current_size > self.data_size_limit:
             self.push('452 Command has been aborted because mail too big')
             self.close_when_done()
 
@@ -135,6 +136,13 @@ class SMTPChannel(object):
             self.seen_greeting = arg
             self.extended_smtp = True
             self.push('250-%s' % self.fqdn)
+
+            try:
+                if self.server.ssl:
+                    self.push('250-STARTTLS')
+            except AttributeError:
+                pass
+
             if self.data_size_limit:
                 self.push('250-SIZE %s' % self.data_size_limit)
             self.push('250 HELP')
@@ -151,7 +159,7 @@ class SMTPChannel(object):
         self.close_when_done()
 
     # factored
-    def __getaddr(self, keyword, arg):
+    def getaddr(self, keyword, arg):
         address = None
         keylen = len(keyword)
         if arg[:keylen].upper() == keyword:
@@ -207,6 +215,15 @@ class SMTPChannel(object):
         self.state = self.DATA
         self.terminator = '\r\n.\r\n'
         self.push('354 End data with <CR><LF>.<CR><LF>')
+
+    def smtp_STARTTLS(self, arg):
+
+        if arg:
+            self.push('501 Syntax: RSET')
+            return
+
+        self.conn = ssl.wrap_socket(self.conn, **self.server.ssl)
+        self.push('220 Ready to start TLS')
 
     def handle_read(self):
         try:
