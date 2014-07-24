@@ -145,7 +145,7 @@ class SMTPChannel(object):
 
             if self.data_size_limit:
                 self.push('250-SIZE %s' % self.data_size_limit)
-            self.push('250 HELP')
+            self.push('250 OK')
 
     def smtp_NOOP(self, arg):
         if arg:
@@ -219,10 +219,15 @@ class SMTPChannel(object):
     def smtp_STARTTLS(self, arg):
 
         if arg:
-            self.push('501 Syntax: RSET')
+            self.push('501 Syntax: STARTTLS')
             return
         self.push('220 Ready to start TLS')
-        self.conn = ssl.wrap_socket(self.conn, **self.server.ssl)
+        try:
+            self.conn = ssl.wrap_socket(self.conn, **self.server.ssl)
+        except Exception as err:
+            logger.error(err, exc_info=True)
+            self.push('500 certificate is FAILED')
+            self.close_when_done()
 
     def handle_read(self):
         try:
