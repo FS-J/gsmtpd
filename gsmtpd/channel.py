@@ -120,20 +120,20 @@ class SMTPChannel(object):
         if not arg:
             self.push('501 Syntax: HELO hostname')
             return
-        if self.seen_greeting:
+        if self.seen_greeting > 1:
             self.push('503 Duplicate HELO/EHLO')
         else:
-            self.seen_greeting = arg
+            self.seen_greeting += 1 # some of sender will try twice of HELO
             self.push('250 %s' % self.fqdn)
 
     def smtp_EHLO(self, arg):
         if not arg:
             self.push('501 Syntax: EHLO hostname')
             return
-        if self.seen_greeting:
+        if self.seen_greeting > 1:
             self.push('503 Duplicate HELO/EHLO')
         else:
-            self.seen_greeting = arg
+            self.seen_greeting += 1
             self.extended_smtp = True
             self.push('250-%s' % self.fqdn)
 
