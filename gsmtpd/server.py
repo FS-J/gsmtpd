@@ -33,7 +33,7 @@ An RFC 2821 smtp proxy Port from Python Standrad Library for gevent usage
 # - handle error codes from the backend smtpd
 
 import logging
-logger = logging.getLevelName(__name__)
+logger = logging.getLogger(__name__)
 
 from UserDict import UserDict
 
@@ -41,7 +41,7 @@ from gevent import socket, monkey, sleep, Timeout
 monkey.patch_all()
 from gevent.server import StreamServer
 
-from ssl import PROTOCOL_TLSv1
+from ssl import PROTOCOL_TLSv1, CERT_OPTIONAL
 
 from channel import SMTPChannel
 
@@ -58,16 +58,17 @@ class SSLSettings(UserDict):
 
     def __init__(self, keyfile=None, certfile=None,
                  ssl_version=PROTOCOL_TLSv1, ca_certs=None,
-                 do_handshake_on_connect=True,
+                 do_handshake_on_connect=True, cert_reqs=CERT_OPTIONAL,
                  suppress_ragged_eofs=True, ciphers=None, **kwargs):
 
-        super(SSLSettings, self).__init__()
+        UserDict.__init__(self) 
         self.data.update( dict(keyfile = keyfile,
                                 certfile = certfile,
                                 server_side = True,
                                 ssl_version = ssl_version,
                                 ca_certs = ca_certs,
                                 do_handshake_on_connect = do_handshake_on_connect,
+                                cert_reqs=cert_reqs,
                                 suppress_ragged_eofs = suppress_ragged_eofs,
                                 ciphers = ciphers))
 
@@ -75,7 +76,8 @@ class SSLSettings(UserDict):
 class SMTPServer(StreamServer):
     
     
-    def __init__(self, localaddr=None, remoteaddr=None, ssl=False, **kwargs):
+    def __init__(self, localaddr=None, remoteaddr=None, timeout=60,
+                       ssl=False, **kwargs):
 
         self.relay = bool(remoteaddr)
         self.remoteaddr = remoteaddr
@@ -89,8 +91,10 @@ class SMTPServer(StreamServer):
 
         if self.ssl:
             self.ssl = SSLSettings(**kwargs)
+        
+        self.timeout = int(timeout)
 
-        super(SMTPServer, self).__init__(self.localaddr, self.handle, **kwargs)
+        super(SMTPServer, self).__init__(self.localaddr, self.handle)
 
     def handle(self, sock, addr):
 
