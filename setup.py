@@ -6,7 +6,7 @@ with open('README.rst') as f:
 with open('requirements.txt') as require:
 
     setup(name='gsmtpd',
-            version='0.1',
+            version='0.1.1',
             license='MIT',
             description='A smtpd server impletement base on Gevent',
             author='Meng Zhuo',
