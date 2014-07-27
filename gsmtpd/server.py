@@ -41,7 +41,8 @@ from gevent import socket, monkey, sleep, Timeout
 monkey.patch_all()
 from gevent.server import StreamServer
 
-from ssl import PROTOCOL_TLSv1, CERT_NONE
+import ssl
+from ssl import CERT_NONE
 
 from channel import SMTPChannel
 
@@ -57,7 +58,7 @@ COMMASPACE = ', '
 class SSLSettings(UserDict):
 
     def __init__(self, keyfile=None, certfile=None,
-                 ssl_version=PROTOCOL_TLSv1, ca_certs=None,
+                 ssl_version='PROTOCOL_SSLv23', ca_certs=None,
                  do_handshake_on_connect=True, cert_reqs=CERT_NONE,
                  suppress_ragged_eofs=True, ciphers=None, **kwargs):
 
@@ -65,7 +66,7 @@ class SSLSettings(UserDict):
         self.data.update( dict(keyfile = keyfile,
                                 certfile = certfile,
                                 server_side = True,
-                                ssl_version = ssl_version,
+                                ssl_version = getattr(ssl, ssl_version, ssl.PROTOCOL_SSLv23),
                                 ca_certs = ca_certs,
                                 do_handshake_on_connect = do_handshake_on_connect,
                                 cert_reqs=cert_reqs,

@@ -39,7 +39,7 @@ class SMTPChannel(object):
         self.closed = False
         self.data_size_limit = data_size_limit # in byte
         self.current_size = 0
-        self.version = '0.1.6'
+        self.version = '0.1.7'
         self.tls = False
         try:
             self.peer = conn.getpeername()
