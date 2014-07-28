@@ -95,6 +95,10 @@ class SMTPServer(StreamServer):
         
         self.timeout = int(timeout)
 
+        self.data_size_limit = 1024000
+        if 'data_size_limit' in kwargs:
+            self.data_size_limit = int(kwargs.pop('data_size_limit'))
+
         super(SMTPServer, self).__init__(self.localaddr, self.handle)
 
     def handle(self, sock, addr):
@@ -106,7 +110,7 @@ class SMTPServer(StreamServer):
         try:
             with Timeout(self.timeout, ConnectionTimeout):
                 try:
-                    sc = SMTPChannel(self, sock, addr)
+                    sc = SMTPChannel(self, sock, addr, self.data_size_limit)
                     while not sc.closed:
                         sc.handle_read()
                         sleep(0.1) # relieve CPU
