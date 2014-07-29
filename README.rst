@@ -22,4 +22,22 @@ however there is only one difference, you should add monkey patch of gevent
     monkey.patch_all()
 
 
+Performance
+---------------
+
+The charts below shows gsmtpd vs asyncIO based smtpd in Python standrary lib.
+
+.. note::
+
+    Response per second = 0 means the program is crashed or refuse to connect
+
+
+
+.. figure:: https://raw.githubusercontent.com/34nm/gsmtpd/master/helo_chart.png
+    :scale: 100%
+
+.. figure:: https://raw.githubusercontent.com/34nm/gsmtpd/master/mail_chart.png
+    :scale: 100%
+
+
 .. _Doc: https://docs.python.org/2/library/smtpd.html?highlight=smtpd#module-smtpd
