@@ -43,7 +43,7 @@ class SMTPChannel(object):
         self.tls = False
         try:
             self.peer = conn.getpeername()
-        except socket.error, err:
+        except socket.error as err:
             # a race condition  may occur if the other end is closing
             # before we can get the peername
             self.close()
