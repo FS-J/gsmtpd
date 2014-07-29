@@ -1,6 +1,9 @@
 gsmtpd
 ======
 
+
+.. image:: https://travis-ci.org/34nm/gsmtpd.svg?branch=master
+
 SMTP servers impletement base on Gevent
 
 Install
