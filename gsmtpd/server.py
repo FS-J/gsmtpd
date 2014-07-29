@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 """
-An RFC 2821 smtp proxy Port from Python Standrad Library for gevent usage
+An RFC 2821 smtp proxy Port from Python Standrad Library for Gevent usage
 """
 
 # Overview:
@@ -21,7 +21,7 @@ An RFC 2821 smtp proxy Port from Python Standrad Library for gevent usage
 #   SMTP errors from the backend server at all.  This should be fixed
 #   (contributions are welcome!).
 #
-# Please note that this script requires Python 2.0
+# Please note that this script requires Python 2.7
 #
 # Author: Barry Warsaw <barry@python.org>
 #         Meng Zhuo <mengzhuo1203@gmail.com>
@@ -76,10 +76,17 @@ class SSLSettings(UserDict):
 
 
 class SMTPServer(StreamServer):
-    
-    
+   
     def __init__(self, localaddr=None, remoteaddr=None, 
                  timeout=60, **kwargs):
+        """Initialize SMTP Server
+        
+        :localaddr: tuple pair that start server, like `('127.0.0.1', 25)`
+        :remoteaddr: ip address (string or list) that can relay on this server
+        :timeout: int that connection Timeout
+        :**kargs: SSL or data size setting
+        :return: None
+        """
 
         self.relay = bool(remoteaddr)
         self.remoteaddr = remoteaddr
