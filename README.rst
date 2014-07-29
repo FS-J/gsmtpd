@@ -24,6 +24,32 @@ however there is only one difference, you should add monkey patch of gevent
     from gevent import monkey
     monkey.patch_all()
 
+Example
+-----------------
+
+.. code-block:: python
+    
+    from gevent import monkey 
+    monkey.patch_all()
+    
+    class DebuggingServer(SMTPServer):
+        # Do something with the gathered message
+        def process_message(self, peer, mailfrom, rcpttos, data):
+            inheaders = 1
+            lines = data.split('\n')
+            print '---------- MESSAGE FOLLOWS ----------'
+            for line in lines:
+                # headers first
+                if inheaders and not line:
+                    print 'X-Peer:', peer[0]
+                    inheaders = 0
+                print line
+            print '------------ END MESSAGE ------------'
+    
+    if __name__ == "__main__":
+        
+        server = DebuggingServer()
+        server.serve_forever()
 
 Performance
 ---------------
