@@ -1,7 +1,7 @@
 # http://travis-ci.org/#!/34nm/gsmtpd
 branches:
     only:
-        -master
+        - master
 language: python
 python:
     - 2.7
