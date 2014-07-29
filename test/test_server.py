@@ -157,4 +157,26 @@ class SimpleSMTPServerTestCase(TestCase):
 
         self.sm.close()
         self.server.clean()
+   
+class SSLServerTestCase(TestCase):
+
+    def setUp(self):
+
+        self.server = SMTPServer(('127.0.0.1', 0), keyfile='server.key', certfile='server.csr')
+        self.server.start()
+        gevent.sleep(0.01)
+        self.sm = smtplib.SMTP()
     
+    @connect
+    def test_STARTTLS(self):
+        run(self.sm.ehlo)
+        self.assertTrue('starttls' in self.sm.esmtp_features)
+    
+    @connect
+    def test_handshake(self):
+        run(self.sm.ehlo)
+        run(self.sm.starttls)
+
+    def tearDown(self):
+
+        self.sm.close()
