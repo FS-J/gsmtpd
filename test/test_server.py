@@ -15,7 +15,7 @@ import logging
 
 logging.basicConfig(level=logging.ERROR)
 
-__all__ = ['SMTPServerTestCase','SimpleSMTPServerTestCase']
+__all__ = ['SMTPServerTestCase','SimpleSMTPServerTestCase','SSLServerTestCase']
 root_path = os.path.dirname(os.path.abspath(__file__))
 
 def connect(func):
@@ -148,11 +148,11 @@ class SimpleSMTPServerTestCase(TestCase):
         with open(self.server.tmp) as f:
             data = json.loads(f.read())
 
-        assert data['mailfrom'] == '<test@example> size=8'
+        self.assertEqual(data['mailfrom'],'<test@example> size=8')
 
-        assert data['rcpttos'] == ['aa@bb.com']
+        self.assertEqual(data['rcpttos'], ['aa@bb.com'])
 
-        assert data['data'] == 'TESTMAIL'
+        self.assertEqual(data['data'],'TESTMAIL')
 
     def tearDown(self):
 
@@ -173,12 +173,19 @@ class SSLServerTestCase(TestCase):
     @connect
     def test_STARTTLS(self):
         run(self.sm.ehlo)
-        self.assertTrue('starttls' in self.sm.esmtp_features)
+        self.assertIn('starttls', self.sm.esmtp_features)
     
     @connect
     def test_handshake(self):
         run(self.sm.ehlo)
+        self.assertEqual(run(self.sm.starttls)[0], 220)
+
+    @connect
+    def test_ssl_mail(self):
+        run(self.sm.ehlo)
         run(self.sm.starttls)
+        self.assertEqual(run(self.sm.mail, 'test@gsmtpd.org')[0], 250)
+
 
     def tearDown(self):
 
