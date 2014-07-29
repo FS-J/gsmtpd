@@ -41,6 +41,7 @@ from gevent import socket, monkey, sleep, Timeout
 monkey.patch_all()
 from gevent.server import StreamServer
 
+
 import ssl
 from ssl import CERT_NONE
 
@@ -77,8 +78,8 @@ class SSLSettings(UserDict):
 class SMTPServer(StreamServer):
     
     
-    def __init__(self, localaddr=None, remoteaddr=None, timeout=60,
-                       ssl=False, **kwargs):
+    def __init__(self, localaddr=None, remoteaddr=None, 
+                 timeout=60, **kwargs):
 
         self.relay = bool(remoteaddr)
         self.remoteaddr = remoteaddr
@@ -113,7 +114,7 @@ class SMTPServer(StreamServer):
                     sc = SMTPChannel(self, sock, addr, self.data_size_limit)
                     while not sc.closed:
                         sc.handle_read()
-                        sleep(0.1) # relieve CPU
+                        sleep(0.01) # relieve CPU
                 finally:
                     sc.close_when_done()
 

@@ -11,6 +11,10 @@ import smtplib
 from gsmtpd import SMTPServer
 from greentest import TestCase
 
+import logging
+
+logging.basicConfig(level=logging.ERROR)
+
 __all__ = ['SMTPServerTestCase','SimpleSMTPServerTestCase']
 
 def connect(func):
@@ -29,11 +33,11 @@ def run(func, *args):
 
 class SMTPServerTestCase(TestCase):
 
-    __timeout__ = 5
+    __timeout__ = 30
 
     def setUp(self):
 
-        self.server = SMTPServer(('127.0.0.1', 0))
+        self.server = SMTPServer(('127.0.0.1', 0), timeout=1)
         self.server.start()
         gevent.sleep(0.01)
         self.sm = smtplib.SMTP()
@@ -90,7 +94,18 @@ class SMTPServerTestCase(TestCase):
     def test_RSET(self):
         assert run(self.sm.rset)[0] == 250
         assert run(self.sm.rcpt, '<target@example.com>')[0] == 503
-    
+
+    @connect
+    def test_timeout(self):
+        gevent.sleep(self.server.timeout+1)
+        try:
+            run(self.sm.mail, 'hi')
+        except Exception as err:
+            assert isinstance(err,smtplib.SMTPServerDisconnected)
+        else:
+            assert False, 'Failed to Timeout'
+
+
     def tearDown(self):
         self.sm.close()
 
