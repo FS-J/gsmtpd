@@ -16,6 +16,7 @@ import logging
 logging.basicConfig(level=logging.ERROR)
 
 __all__ = ['SMTPServerTestCase','SimpleSMTPServerTestCase']
+root_path = os.path.dirname(os.path.abspath(__file__))
 
 def connect(func):
 
@@ -162,7 +163,9 @@ class SSLServerTestCase(TestCase):
 
     def setUp(self):
 
-        self.server = SMTPServer(('127.0.0.1', 0), keyfile='server.key', certfile='server.csr')
+        self.server = SMTPServer(('127.0.0.1', 0), 
+                                 keyfile=os.path.join(root_path, 'server.key'),
+                                 certfile=os.path.join(root_path, 'server.crt'))
         self.server.start()
         gevent.sleep(0.01)
         self.sm = smtplib.SMTP()
