@@ -88,16 +88,16 @@ class SMTPServer(StreamServer):
         if not self.localaddr:
             self.localaddr = ('127.0.0.1', 25)
         
-        self.ssl = ssl
-
-        if self.ssl:
-            self.ssl = SSLSettings(**kwargs)
+        self.ssl = None
         
         self.timeout = int(timeout)
 
         self.data_size_limit = 1024000
         if 'data_size_limit' in kwargs:
             self.data_size_limit = int(kwargs.pop('data_size_limit'))
+
+        if 'keyfile' in kwargs:
+            self.ssl = SSLSettings(**kwargs)
 
         super(SMTPServer, self).__init__(self.localaddr, self.handle)
 
