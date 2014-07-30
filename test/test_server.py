@@ -98,7 +98,7 @@ class SMTPServerTestCase(TestCase):
 
     @connect
     def test_timeout(self):
-        gevent.sleep(self.server.timeout+1)
+        gevent.sleep(self.server.timeout+0.0001)
         try:
             run(self.sm.mail, 'hi')
         except Exception as err:
@@ -163,7 +163,7 @@ class SSLServerTestCase(TestCase):
 
     def setUp(self):
 
-        self.server = SMTPServer(('127.0.0.1', 0), 
+        self.server = TmpFileMailServer(('127.0.0.1', 0), 
                                  keyfile=os.path.join(root_path, 'server.key'),
                                  certfile=os.path.join(root_path, 'server.crt'))
         self.server.start()
@@ -185,8 +185,23 @@ class SSLServerTestCase(TestCase):
         run(self.sm.ehlo)
         run(self.sm.starttls)
         self.assertEqual(run(self.sm.mail, 'test@gsmtpd.org')[0], 250)
+    
+    @connect
+    def test_send(self):
 
+        run(self.sm.ehlo)
+        run(self.sm.starttls)
+        self.sm.sendmail('test@example', ['aa@bb.com'], 'TESTMAIL')
+        with open(self.server.tmp) as f:
+            data = json.loads(f.read())
+
+        self.assertEqual(data['mailfrom'],'<test@example> size=8')
+
+        self.assertEqual(data['rcpttos'], ['aa@bb.com'])
+
+        self.assertEqual(data['data'],'TESTMAIL')
 
     def tearDown(self):
 
         self.sm.close()
+        self.server.clean()
