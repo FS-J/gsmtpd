@@ -194,8 +194,13 @@ class SMTPChannel(object):
         if not address:
             self.push('501 Syntax: RCPT TO: <address>')
             return
-        self.rcpttos.append(address)
-        self.push('250 Ok')
+        
+        result = self.server.process_rcpt(address)
+        if not result:
+            self.rcpttos.append(address)
+            self.push('250 Ok')
+        else:
+            self.push(result)
 
     def smtp_RSET(self, arg):
         if arg:

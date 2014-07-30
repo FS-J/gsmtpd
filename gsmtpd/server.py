@@ -156,7 +156,17 @@ class SMTPServer(StreamServer):
 
         """
         raise NotImplementedError
+    
+    # API that handle rcpt
+    def process_rcpt(self, address):
+        """Override this abstract method to handle rcpt from the client
 
+        :address: is raw address the client wishes to deliver the message to
+
+        This function should return None, for a normal `250 Ok' response;
+        otherwise it returns the desired response string in RFC 821 format.
+        """
+        pass
 
 class DebuggingServer(SMTPServer):
     # Do something with the gathered message
