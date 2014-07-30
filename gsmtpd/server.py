@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 """
-An RFC 2821 smtp proxy Port from Python Standrad Library for Gevent usage
+An RFC 2821 smtp proxy server port from Python Standrad Library for Gevent usage
 """
 
 # Overview:
@@ -47,7 +47,7 @@ from ssl import CERT_NONE
 
 from .channel import SMTPChannel
 
-__all__ = ["SMTPServer", "DebuggingServer", "PureProxy"]
+__all__ = ["SMTPServer", "DebuggingServer", "PureProxy", 'SSLSettings']
 
 class ConnectionTimeout(Exception):
     pass
@@ -57,12 +57,16 @@ EMPTYSTRING = ''
 COMMASPACE = ', '
 
 class SSLSettings(UserDict):
-
+    """SSL settings object"""
     def __init__(self, keyfile=None, certfile=None,
                  ssl_version='PROTOCOL_SSLv23', ca_certs=None,
                  do_handshake_on_connect=True, cert_reqs=CERT_NONE,
                  suppress_ragged_eofs=True, ciphers=None, **kwargs):
+        """settings of SSL
 
+        :param keyfile: SSL key file path usally end with ".key"
+        :param certfile: SSL cert file path usally end with ".crt"
+        """
         UserDict.__init__(self) 
         self.data.update( dict(keyfile = keyfile,
                                 certfile = certfile,
@@ -76,16 +80,18 @@ class SSLSettings(UserDict):
 
 
 class SMTPServer(StreamServer):
-   
+    """Abstrcted SMTP server
+    """
+
     def __init__(self, localaddr=None, remoteaddr=None, 
-                 timeout=60, **kwargs):
+                 timeout=60, data_size_limit=10240000, **kwargs):
         """Initialize SMTP Server
-        
-        :localaddr: tuple pair that start server, like `('127.0.0.1', 25)`
-        :remoteaddr: ip address (string or list) that can relay on this server
-        :timeout: int that connection Timeout
-        :**kargs: SSL or data size setting
-        :return: None
+
+        :param localaddr: tuple pair that start server, like `('127.0.0.1', 25)`
+        :param remoteaddr: ip address (string or list) that can relay on this server
+        :param timeout: int that connection Timeout
+        :param data_size_limit: max byte per mail data
+        :param kwargs: other key-arguments will pass to :class:`.SSLSettings`
         """
 
         self.relay = bool(remoteaddr)
@@ -100,9 +106,7 @@ class SMTPServer(StreamServer):
         
         self.timeout = int(timeout)
 
-        self.data_size_limit = 1024000
-        if 'data_size_limit' in kwargs:
-            self.data_size_limit = int(kwargs.pop('data_size_limit'))
+        self.data_size_limit = int(data_size_limit)
 
         if 'keyfile' in kwargs:
             self.ssl = SSLSettings(**kwargs)
@@ -136,19 +140,14 @@ class SMTPServer(StreamServer):
     def process_message(self, peer, mailfrom, rcpttos, data):
         """Override this abstract method to handle messages from the client.
 
-        peer is a tuple containing (ipaddr, port) of the client that made the
-        socket connection to our smtp port.
-
-        mailfrom is the raw address the client claims the message is coming
-        from.
-
-        rcpttos is a list of raw addresses the client wishes to deliver the
-        message to.
-
-        data is a string containing the entire full text of the message,
-        headers (if supplied) and all.  It has been `de-transparencied'
-        according to RFC 821, Section 4.5.2.  In other words, a line
-        containing a `.' followed by other text has had the leading dot
+        :param peer: is a tuple containing (ipaddr, port) of the client that made\n
+                     the socket connection to our smtp port.
+        :param mailfrom: is the raw address the client claims the message is coming from.
+        :param rcpttos: is a list of raw addresses the client wishes to deliver the message to.
+        :param data: is a string containing the entire full text of the message,\n
+                     headers (if supplied) and all.  It has been `de-transparencied'\n
+                     according to RFC 821, Section 4.5.2.\n
+                     In other words, a line containing a `.' followed by other text has had the leading dot
         removed.
 
         This function should return None, for a normal `250 Ok' response;
@@ -161,7 +160,7 @@ class SMTPServer(StreamServer):
     def process_rcpt(self, address):
         """Override this abstract method to handle rcpt from the client
 
-        :address: is raw address the client wishes to deliver the message to
+        :param address: is raw address the client wishes to deliver the message to
 
         This function should return None, for a normal `250 Ok' response;
         otherwise it returns the desired response string in RFC 821 format.

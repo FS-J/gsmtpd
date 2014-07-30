@@ -2,19 +2,28 @@
 # encoding: utf-8
 
 """
-gsmtpd servers utils
+gsmtpd server
 ---------------------
 
 gsmtpd is a SMTP server implement based on Gevent library,
 better in conccurence and more API
 
-usage:
+Example
 
-    >>> from gevent import monkey
-    >>> monkey.patch_all()
-    >>> from gsmtpd import SMTPServer
-    >>> # then make your own SMTP server
+.. code:: python
 
+    from gevent import monkey
+    monkey.patch_all()
+
+    from gsmtpd import SMTPServer
+
+    class PrintSMTPServer(SMTPServer):
+
+        def process_message(self, peer, mailfrom, rcpttos, data):
+            print data
+
+    print_server = PrintSMTPServer()
+    print_server.serve_forever()
 
 """
 
