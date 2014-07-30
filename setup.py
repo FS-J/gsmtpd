@@ -6,15 +6,13 @@ try:
 except ImportError:
     from distutils.core import setup
 
-from gsmtpd import __version__
-
 with open('README.rst') as f:
     long_description = f.read()
 
 with open('requirements.txt') as require:
 
     setup(name='gsmtpd',
-            version=__version__,
+            version='0.1.9.1',
             license='MIT',
             description='A smtpd server impletement based on Gevent',
             author='Meng Zhuo',
