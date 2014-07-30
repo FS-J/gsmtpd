@@ -45,7 +45,7 @@ from gevent.server import StreamServer
 import ssl
 from ssl import CERT_NONE
 
-from channel import SMTPChannel
+from .channel import SMTPChannel
 
 __all__ = ["SMTPServer", "DebuggingServer", "PureProxy"]
 
@@ -121,7 +121,7 @@ class SMTPServer(StreamServer):
                     sc = SMTPChannel(self, sock, addr, self.data_size_limit)
                     while not sc.closed:
                         sc.handle_read()
-                        sleep(0.01) # relieve CPU
+                        sleep(0.0001) # relieve CPU
                 finally:
                     sc.close_when_done()
 
