@@ -50,13 +50,24 @@ lag=3Dnull</a><br/>=EF=BC=88=E5=A6=82=E6=9E=9C=E4=B8=8A=E9=9D=A2=E7=9A=84=
 
 def timeit(func):
 
-    def wrap(num, *args, **kwargs):
+    def wrap(num, port, *args, **kwargs):
         
         max_rqs = 0
         for _ in xrange(3):
+
+            conns = [smtplib.SMTP(port=port) for x in xrange(num)] 
+            map(lambda x: x.connect('127.0.0.1', port), conns)
+
             start_at = time.time()
-            func(num, *args, **kwargs)
+            func(num, conns, **kwargs)
             interval = time.time() - start_at
+            for con in conns:
+                try:
+                    con.quit()
+                    con.close()
+                except Exception:
+                    pass
+            gevent.sleep(3)
             rqs = num/interval
             max_rqs = max(rqs, max_rqs)
         return max_rqs
@@ -77,10 +88,7 @@ def send(num, conns):
 
 def main(port, num):
     
-    conns = [smtplib.SMTP(port=port) for x in xrange(num)] 
-    map(lambda x: x.connect('127.0.0.1', port), conns)
-    
-    print "%d %s %s"% (num, helo(num, conns), send(num, conns) )
+    print "%d %s %s"% (num, helo(num, port), send(num, port) )
 
 
 if __name__ == '__main__':
