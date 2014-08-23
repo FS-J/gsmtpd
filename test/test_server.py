@@ -99,13 +99,7 @@ class SMTPServerTestCase(TestCase):
     @connect
     def test_timeout(self):
         gevent.sleep(self.server.timeout+1)
-        try:
-            run(self.sm.mail, 'hi')
-        except Exception as err:
-            assert isinstance(err,smtplib.SMTPServerDisconnected)
-        else:
-            assert False, 'Failed to Timeout'
-
+        self.assertRaises(smtplib.SMTPServerDisconnected, run, self.sm.mail, 'hi')
 
     def tearDown(self):
         self.sm.close()

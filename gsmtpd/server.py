@@ -117,18 +117,16 @@ class SMTPServer(StreamServer):
             return 
         try:
             with Timeout(self.timeout, ConnectionTimeout):
-                try:
-                    sc = SMTPChannel(self, sock, addr, self.data_size_limit)
-                    while not sc.closed:
-                        sc.handle_read()
-                        sleep(0.01) # relieve CPU
-                finally:
-                    sc.close_when_done()
+                sc = SMTPChannel(self, sock, addr, self.data_size_limit)
+                while not sc.closed:
+                    sc.handle_read()
+                    sleep(0.01) # relieve CPU
 
         except ConnectionTimeout:
             logger.warn('%s:%s Timeouted', *addr[:2])
 
         finally:
+            # clean up
             if not sock.closed:
                 sock.close()
 
