@@ -1,4 +1,10 @@
-from setuptools import setup
+#!/usr/bin/env python
+# encoding: utf-8
+
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 
 with open('README.rst') as f:
     long_description = f.read()
@@ -6,7 +12,7 @@ with open('README.rst') as f:
 with open('requirements.txt') as require:
 
     setup(name='gsmtpd',
-            version='0.1.8',
+            version='0.1.9.1',
             license='MIT',
             description='A smtpd server impletement based on Gevent',
             author='Meng Zhuo',
@@ -22,4 +28,5 @@ with open('requirements.txt') as require:
                         'Topic :: Communications :: Email :: Mail Transport Agents',
                         'Topic :: Communications :: Email'
             ],
+            platforms='any',
             long_description=long_description)

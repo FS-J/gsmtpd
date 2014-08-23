@@ -69,4 +69,4 @@ The charts below shows gsmtpd vs asyncIO based smtpd in Python standrary lib.
     :scale: 100%
 
 
-.. _Doc: https://docs.python.org/2/library/smtpd.html?highlight=smtpd#module-smtpd
+.. _Doc: http://gsmtpd.readthedocs.org

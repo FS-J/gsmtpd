@@ -10,6 +10,7 @@ monkey.patch_all()
 import smtplib
 from gsmtpd import SMTPServer
 from greentest import TestCase
+from .utils import connect, run
 
 import logging
 
@@ -17,20 +18,6 @@ logging.basicConfig(level=logging.ERROR)
 
 __all__ = ['SMTPServerTestCase','SimpleSMTPServerTestCase','SSLServerTestCase']
 root_path = os.path.dirname(os.path.abspath(__file__))
-
-def connect(func):
-
-    def wrap(self, *args, **kwargs):
-        
-        task = gevent.spawn(self.sm.connect, '127.0.0.1', self.server.server_port)
-        task.run()
-        return func(self, *args, **kwargs)
-    return wrap
-
-def run(func, *args):
-    task = gevent.spawn(func, *args)
-    task.run()
-    return task.value
 
 class SMTPServerTestCase(TestCase):
 
@@ -98,8 +85,9 @@ class SMTPServerTestCase(TestCase):
 
     @connect
     def test_timeout(self):
-        gevent.sleep(self.server.timeout+1)
+        gevent.sleep(self.server.timeout+0.0001)
         self.assertRaises(smtplib.SMTPServerDisconnected, run, self.sm.mail, 'hi')
+
 
     def tearDown(self):
         self.sm.close()
@@ -157,7 +145,7 @@ class SSLServerTestCase(TestCase):
 
     def setUp(self):
 
-        self.server = SMTPServer(('127.0.0.1', 0), 
+        self.server = TmpFileMailServer(('127.0.0.1', 0), 
                                  keyfile=os.path.join(root_path, 'server.key'),
                                  certfile=os.path.join(root_path, 'server.crt'))
         self.server.start()
@@ -179,8 +167,23 @@ class SSLServerTestCase(TestCase):
         run(self.sm.ehlo)
         run(self.sm.starttls)
         self.assertEqual(run(self.sm.mail, 'test@gsmtpd.org')[0], 250)
+    
+    @connect
+    def test_send(self):
 
+        run(self.sm.ehlo)
+        run(self.sm.starttls)
+        self.sm.sendmail('test@example', ['aa@bb.com'], 'TESTMAIL')
+        with open(self.server.tmp) as f:
+            data = json.loads(f.read())
+
+        self.assertEqual(data['mailfrom'],'<test@example> size=8')
+
+        self.assertEqual(data['rcpttos'], ['aa@bb.com'])
+
+        self.assertEqual(data['data'],'TESTMAIL')
 
     def tearDown(self):
 
         self.sm.close()
+        self.server.clean()

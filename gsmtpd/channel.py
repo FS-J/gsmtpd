@@ -39,7 +39,6 @@ class SMTPChannel(object):
         self.closed = False
         self.data_size_limit = data_size_limit # in byte
         self.current_size = 0
-        self.version = '0.1.8'
         self.tls = False
         try:
             self.peer = conn.getpeername()
@@ -50,7 +49,7 @@ class SMTPChannel(object):
             if err[0] != errno.ENOTCONN:
                 raise
             return
-        self.push('220 %s %s' % (self.fqdn, self.version))
+        self.push('220 %s GSMTPD at your service' % self.fqdn)
         self.terminator = '\r\n'
         logger.debug('SMTP channel initialized')
 
@@ -195,8 +194,13 @@ class SMTPChannel(object):
         if not address:
             self.push('501 Syntax: RCPT TO: <address>')
             return
-        self.rcpttos.append(address)
-        self.push('250 Ok')
+        
+        result = self.server.process_rcpt(address)
+        if not result:
+            self.rcpttos.append(address)
+            self.push('250 Ok')
+        else:
+            self.push(result)
 
     def smtp_RSET(self, arg):
         if arg:
