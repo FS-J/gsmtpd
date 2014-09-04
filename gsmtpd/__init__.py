@@ -28,7 +28,7 @@ Example
 """
 
 __title__ = 'gsmtpd'
-__version__ = '0.1.9.2'
+__version__ = '0.1.9.3'
 __author__ = 'Meng Zhuo <mengzhuo1203@gmail.com>'
 
 from .server import SMTPServer, DebuggingServer, PureProxy
