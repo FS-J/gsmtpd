@@ -8,7 +8,7 @@ import smtplib
 
 from .greentest import TestCase
 from .utils import connect, run
-from gsmtpd import SMTPServer
+from gsmtpd.server import SMTPServer
 
 __all__ = ['ProcessRCPTServerTestCase', 'RCPTAPITestCase']
 

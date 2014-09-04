@@ -8,7 +8,7 @@ from gevent import monkey
 monkey.patch_all()
 
 import smtplib
-from gsmtpd import SMTPServer
+from gsmtpd.server import SMTPServer
 from greentest import TestCase
 from .utils import connect, run
 
