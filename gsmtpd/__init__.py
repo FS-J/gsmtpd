@@ -15,7 +15,7 @@ Example
     from gevent import monkey
     monkey.patch_all()
 
-    from gsmtpd import SMTPServer
+    from gsmtpd.server import SMTPServer
 
     class PrintSMTPServer(SMTPServer):
 
