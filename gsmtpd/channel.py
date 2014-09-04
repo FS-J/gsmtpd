@@ -149,7 +149,7 @@ class SMTPChannel(object):
             if self.data_size_limit:
                 self.push('250-SIZE %s' % self.data_size_limit)
             self.push('250 HELP')
-
+    
     def smtp_NOOP(self, arg):
         if arg:
             self.push('501 Syntax: NOOP')
@@ -159,6 +159,10 @@ class SMTPChannel(object):
     def smtp_QUIT(self, arg=""):
         # args is ignored
         self.push('221 Bye')
+        self.close_when_done()
+
+    def smtp_TIMEOUT(self, arg=""):
+        self.push('421 2.0.0 Bye')
         self.close_when_done()
 
     # factored

@@ -130,7 +130,7 @@ class SMTPServer(StreamServer):
         except ConnectionTimeout:
             logger.warn('%s:%s Timeouted', *addr[:2])
             try:
-                sc.smtp_QUIT()
+                sc.smtp_TIMEOUT()
             except Exception as err:
                 logger.debug(err)
         except Exception as err:
