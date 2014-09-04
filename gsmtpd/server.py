@@ -116,6 +116,7 @@ class SMTPServer(StreamServer):
     def handle(self, sock, addr):
 
         logger.debug('Incomming connection %s:%s', *addr[:2])
+
         if self.relay and not addr[0] in self.remoteaddr:
             logger.debug('Not in remoteaddr', *addr[:2])
             return 
@@ -128,11 +129,12 @@ class SMTPServer(StreamServer):
 
         except ConnectionTimeout:
             logger.warn('%s:%s Timeouted', *addr[:2])
-
-        finally:
-            # clean up
-            if not sock.closed:
-                sock.close()
+            try:
+                sc.smtp_QUIT()
+            except Exception as err:
+                logger.debug(err)
+        except Exception as err:
+            logger.error(err)
 
     # API for "doing something useful with the message"
     def process_message(self, peer, mailfrom, rcpttos, data):

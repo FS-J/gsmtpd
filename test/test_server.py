@@ -86,7 +86,7 @@ class SMTPServerTestCase(TestCase):
     @connect
     def test_timeout(self):
         gevent.sleep(self.server.timeout+0.0001)
-        self.assertRaises(smtplib.SMTPServerDisconnected, run, self.sm.mail, 'hi')
+        self.assertEqual(run(self.sm.mail, 'hi')[0], 221)
 
 
     def tearDown(self):

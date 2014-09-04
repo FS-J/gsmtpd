@@ -156,7 +156,7 @@ class SMTPChannel(object):
         else:
             self.push('250 Ok')
 
-    def smtp_QUIT(self, arg):
+    def smtp_QUIT(self, arg=""):
         # args is ignored
         self.push('221 Bye')
         self.close_when_done()
