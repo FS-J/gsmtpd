@@ -54,7 +54,7 @@ Example
 Performance
 ---------------
 
-The charts below shows gsmtpd vs asyncIO based smtpd in Python standrary lib.
+The charts below shows gsmtpd vs asyncore based smtpd in Python standrary lib.
 
 .. note::
 
