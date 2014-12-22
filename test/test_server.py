@@ -37,6 +37,14 @@ class SMTPServerTestCase(TestCase):
         assert task[0] == 220
 
     @connect
+    def test_broken_client(self):
+        self.sm.sock.close()
+        self.dup_sm = smtplib.SMTP()
+        # if broken blocks this testcase can't processed
+        self.dup_sm.connect('127.0.0.1', self.server.server_port)
+        self.assertEqual(self.dup_sm.ehlo()[0], 250)
+
+    @connect
     def test_HELO(self):
         
         assert run(self.sm.helo)[0] == 250

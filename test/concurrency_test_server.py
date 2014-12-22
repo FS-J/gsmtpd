@@ -1,8 +1,11 @@
 from gevent import monkey
 monkey.patch_all()
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
+)
 
-
-from gsmtpd import SMTPServer
+from gsmtpd.server import SMTPServer
 
 class P(SMTPServer):
 

@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 
 from UserDict import UserDict
 
-from gevent import socket, monkey, sleep, Timeout
+from gevent import socket, monkey, Timeout
 monkey.patch_all()
 from gevent.server import StreamServer
 
@@ -125,7 +125,6 @@ class SMTPServer(StreamServer):
                 sc = SMTPChannel(self, sock, addr, self.data_size_limit)
                 while not sc.closed:
                     sc.handle_read()
-                    sleep(0.0001) # relieve CPU
 
         except ConnectionTimeout:
             logger.warn('%s:%s Timeouted', *addr[:2])

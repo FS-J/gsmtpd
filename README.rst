@@ -28,10 +28,11 @@ Example
 -----------------
 
 .. code-block:: python
-    
+        
     from gevent import monkey 
     monkey.patch_all()
-    
+    from gsmtpd.server import SMTPServer
+
     class DebuggingServer(SMTPServer):
         # Do something with the gathered message
         def process_message(self, peer, mailfrom, rcpttos, data):

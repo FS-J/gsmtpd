@@ -266,7 +266,8 @@ class SMTPChannel(object):
         try:
             data = self.conn.recv(self.ac_in_buffer_size)
             if len(data) == 0:
-                self.close_when_done() # issues 2 
+                # issues 2 TCP connect closed will send a 0 size pack
+                self.close_when_done()
         except socket.error:
             self.handle_error()
             return
