@@ -265,6 +265,8 @@ class SMTPChannel(object):
     def handle_read(self):
         try:
             data = self.conn.recv(self.ac_in_buffer_size)
+            if len(data) == 0:
+                self.close_when_done() # issues 2 
         except socket.error:
             self.handle_error()
             return
